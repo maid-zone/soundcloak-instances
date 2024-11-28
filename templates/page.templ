@@ -1,0 +1,98 @@
+package templates
+
+import "github.com/maid-zone/soundcloak-instances/data"
+import "time"
+
+templ Link(l data.Link) {
+    if l.URL != "" {
+        <a href={ templ.URL(l.URL) }>{ l.Text }</a>
+    } else {
+        { l.Text }
+    }
+}
+
+templ Status(i data.InstanceInfo) {
+	if i.SkippedResolve {
+		❔
+	} else if i.Error != nil && i.Error != data.ErrNotFound {
+        🔴
+    } else {
+        🟢
+    }
+}
+
+templ Bool(what bool, i data.InstanceInfo) {
+	if i.SkippedResolve || i.Error == data.ErrNotFound {
+		❔
+		{{ return }}
+	} else if i.Error != nil {
+		❓
+		{{ return }}
+	}
+
+	if what {
+		✅
+	} else {
+		❌
+	}
+}
+
+templ Instances(instances map[data.Instance]data.InstanceInfo) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<link rel="icon" href="/maidzonebroom.png"/>
+			<title>instances ~ soundcloak</title>
+			<link rel="stylesheet" href="/style.css"/>
+		</head>
+		<body>
+			<div id="top">
+				<h1><img src="/maidzonebroom.png" style="height: 2rem;"/><a href="/">maid.zone</a><img src="/maidzonebroom.png" style="height: 2rem; transform: scaleX(-1)"/></h1>
+			</div>
+			<p id="title">soundcloak</p>
+			<h2>list of public <a href="https://github.com/maid-zone/soundcloak">soundcloak</a> instances</h2>
+			<h3>to be listed here: <a href="https://github.com/maid-zone/soundcloak/discussions/new?category=ideas">create a discussion with some information about your instance</a> or <a href="https://laptopc.at">get in touch with me</a></h3>
+			<h3><i>also available <a href="/soundcloak/instances.json">in JSON</a></i></h3>
+			<table style="width: 100%;">
+				<tr>
+					<th>Instance</th>
+                    <th>Status</th>
+					<th>ProxyStreams</th>
+					<th>ProxyImages</th>
+					<th>Restream</th>
+					<th>Country</th>
+					<th>Maintainer(s)</th>
+					<th>Note</th>
+				</tr>
+				for _, instance := range data.Instances {
+                    {{ info := instances[instance] }} // We iterate over the list and not the map to preserve order. Maps in go are unordered
+					<tr>
+						<th>
+							@Link(instance.URL)
+						</th>
+                        <th>
+                            @Status(info)
+                        </th>
+						<th>
+							@Bool(info.ProxyStreams, info)
+						</th>
+						<th>
+							@Bool(info.ProxyImages, info)
+						</th>
+						<th>
+							@Bool(info.Restream, info)
+						</th>
+						<th>{ instance.Country }</th>
+						<th>
+							@Link(instance.Maintainer)
+						</th>
+						<th>{ instance.Note }</th>
+					</tr>
+				}
+			</table>
+			<h3>Updated every 30 minutes. | Last Updated: {time.Now().UTC().Format(time.RFC3339)}</h3>
+		</body>
+	</html>
+}
