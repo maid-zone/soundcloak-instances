@@ -39,6 +39,17 @@ type JSONInstance struct {
 	Status   JSONStatus
 }
 
+func DoWithRetry(req *fasthttp.Request, resp *fasthttp.Response) (err error) {
+	for i := 0; i < 5; i++ {
+		err = fasthttp.Do(req, resp)
+		if err == nil {
+			return nil
+		}
+	}
+
+	return
+}
+
 func resolve(instance string) (i data.InstanceInfo, err error) {
 	req := fasthttp.AcquireRequest()
 	defer fasthttp.ReleaseRequest(req)
@@ -49,7 +60,7 @@ func resolve(instance string) (i data.InstanceInfo, err error) {
 	resp := fasthttp.AcquireResponse()
 	defer fasthttp.ReleaseResponse(resp)
 
-	err = fasthttp.Do(req, resp)
+	err = DoWithRetry(req, resp)
 	if err != nil {
 		return
 	}
