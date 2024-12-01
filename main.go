@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"time"
 
 	"github.com/segmentio/encoding/json"
 
@@ -45,6 +46,9 @@ func DoWithRetry(req *fasthttp.Request, resp *fasthttp.Response) (err error) {
 		if err == nil {
 			return nil
 		}
+
+		// god damn
+		time.Sleep(100 * time.Millisecond)
 	}
 
 	return
