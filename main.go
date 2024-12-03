@@ -41,14 +41,14 @@ type JSONInstance struct {
 }
 
 func DoWithRetry(req *fasthttp.Request, resp *fasthttp.Response) (err error) {
-	for i := 0; i < 5; i++ {
+	for i := 1; i <= 5; i++ {
 		err = fasthttp.Do(req, resp)
 		if err == nil {
 			return nil
 		}
 
 		// god damn
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(time.Duration(i) * time.Second)
 	}
 
 	return
