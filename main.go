@@ -15,9 +15,9 @@ import (
 )
 
 // The script will write data to file + ".json" and file + ".html"
-const file = "/home/maid.zone/website/assets/soundcloak/instances"
+//const file = "/home/maid.zone/website/assets/soundcloak/instances"
 
-//const file = "test"
+const file = "test"
 
 type JSONSettings struct {
 	ProxyImages  bool

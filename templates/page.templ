@@ -1,24 +1,27 @@
 package templates
 
-import "github.com/maid-zone/soundcloak-instances/data"
-import "time"
+import (
+	"github.com/maid-zone/soundcloak-instances/data"
+	"time"
+	"strings"
+)
 
 templ Link(l data.Link) {
-    if l.URL != "" {
-        <a href={ templ.URL(l.URL) }>{ l.Text }</a>
-    } else {
-        { l.Text }
-    }
+	if l.URL != "" {
+		<a href={ templ.URL(l.URL) }>{ l.Text }</a>
+	} else {
+		{ l.Text }
+	}
 }
 
 templ Status(i data.InstanceInfo) {
 	if i.SkippedResolve {
 		❔
 	} else if i.Error != nil && i.Error != data.ErrNotFound {
-        🔴
-    } else {
-        🟢
-    }
+		🔴
+	} else {
+		🟢
+	}
 }
 
 templ Bool(what bool, i data.InstanceInfo) {
@@ -29,7 +32,6 @@ templ Bool(what bool, i data.InstanceInfo) {
 		❓
 		{{ return }}
 	}
-
 	if what {
 		✅
 	} else {
@@ -58,23 +60,24 @@ templ Instances(instances map[data.Instance]data.InstanceInfo) {
 			<table style="width: 100%;">
 				<tr>
 					<th>Instance</th>
-                    <th>Status</th>
+					<th>Status</th>
 					<th>ProxyStreams</th>
 					<th>ProxyImages</th>
 					<th>Restream</th>
 					<th>Country</th>
 					<th>Maintainer(s)</th>
+					<th>Commit</th>
 					<th>Note</th>
 				</tr>
 				for _, instance := range data.Instances {
-                    {{ info := instances[instance] }} // We iterate over the list and not the map to preserve order. Maps in go are unordered
+					{{ info := instances[instance] }} // We iterate over the list and not the map to preserve order. Maps in go are unordered
 					<tr>
 						<th>
 							@Link(instance.URL)
 						</th>
-                        <th>
-                            @Status(info)
-                        </th>
+						<th>
+							@Status(info)
+						</th>
 						<th>
 							@Bool(info.ProxyStreams, info)
 						</th>
@@ -88,11 +91,22 @@ templ Instances(instances map[data.Instance]data.InstanceInfo) {
 						<th>
 							@Link(instance.Maintainer)
 						</th>
+						<th>
+							if info.Commit != "unknown" && info.Commit != "" && info.Repo != "unknown" && info.Repo != "" {
+								<a href={templ.URL(strings.TrimRight(info.Repo, ".git") + "/commit/" + info.Commit)}>{info.Commit}</a>
+							} else {
+								if info.Error != nil && info.Error != data.ErrNotFound {
+									❓
+								} else {
+									❔
+								}
+							}
+						</th>
 						<th>{ instance.Note }</th>
 					</tr>
 				}
 			</table>
-			<h3>Updated every 10 minutes. | Last Update: {time.Now().UTC().Format(time.RFC3339)}</h3>
+			<h3>Updated every 10 minutes. | Last Update: { time.Now().UTC().Format(time.RFC3339) }</h3>
 		</body>
 	</html>
 }

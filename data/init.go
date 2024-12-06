@@ -54,6 +54,8 @@ var Instances = []Instance{
 
 // We're only interested in these 3 properties for now
 type InstanceInfo struct {
+	Commit       string
+	Repo         string
 	ProxyImages  bool
 	ProxyStreams bool
 	Restream     bool
